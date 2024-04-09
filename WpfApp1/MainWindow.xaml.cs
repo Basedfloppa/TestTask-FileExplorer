@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -52,14 +53,18 @@ namespace FileSearchApp
 
             try
             {
+                int allFiles = 0;
                 int totalFiles = 0;
                 int totalDirectories = 0;
+                Stopwatch timer = new Stopwatch();
 
-                ProcessDirectory(startDirectory, fileNamePattern, rootNode, ref totalFiles, ref totalDirectories);
+                timer.Start();
+                ProcessDirectory(startDirectory, fileNamePattern, rootNode, ref totalFiles, ref totalDirectories, ref allFiles);
+                timer.Stop();
 
                 Dispatcher.Invoke(() =>
                 {
-                    statusTextBlock.Text = $"Найдено файлов: {totalFiles}, Найдено директорий: {totalDirectories}";
+                    statusTextBlock.Text = $"Найдено файлов: {totalFiles}, Найдено директорий: {totalDirectories}, Заняло времени: {timer.ElapsedMilliseconds}ms\nВсего файлов: {allFiles}";
                 });
 
                 isSearching = false;
@@ -74,7 +79,7 @@ namespace FileSearchApp
             }
         }
 
-        private void ProcessDirectory(string directory, string fileNamePattern, TreeViewItem parentNode, ref int totalFiles, ref int totalDirectories)
+        private void ProcessDirectory(string directory, string fileNamePattern, TreeViewItem parentNode, ref int totalFiles, ref int totalDirectories, ref int allFiles)
         {
             try
             {
@@ -88,7 +93,7 @@ namespace FileSearchApp
                         var subDirectoryNode = CreateDirectoryNode(subDirectory);
                         parentNode.Items.Add(subDirectoryNode);
                     });
-                    ProcessDirectory(subDirectory, fileNamePattern, (TreeViewItem)parentNode.Items[parentNode.Items.Count - 1], ref totalFiles, ref totalDirectories);
+                    ProcessDirectory(subDirectory, fileNamePattern, (TreeViewItem)parentNode.Items[parentNode.Items.Count - 1], ref totalFiles, ref totalDirectories, ref allFiles);
                 }
 
                 foreach (string file in Directory.GetFiles(directory))
@@ -106,6 +111,7 @@ namespace FileSearchApp
                         });
                         totalFiles++;
                     }
+                    allFiles++;
                 }
             }
             catch (Exception ex)
