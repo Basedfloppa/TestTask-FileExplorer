@@ -128,7 +128,7 @@ namespace FileSearchApp
             var node = new TreeViewItem();
             node.Header = directory;
             node.Tag = directory;
-            node.Items.Add(""); // Добавляем пустой элемент, чтобы у узла была возможность раскрыться
+            node.Items.Add("");
             return node;
         }
 
